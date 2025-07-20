@@ -12,10 +12,15 @@ const app = express();
 
 // ✅ Allow frontend origin during dev
 app.use(cors({
-    origin: 'http://localhost:5173', // OR use "*" if you want to allow all
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: 'http://localhost:5173', // or "*" for all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
 }));
+
+// Handle OPTIONS explicitly (important for serverless environments)
+app.options('*', cors());
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
