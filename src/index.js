@@ -1,52 +1,28 @@
-// const express = require('express');
-// const bodyParser = require('body-parser');
-// const cors = require('cors');
-// const serverless = require('serverless-http'); // required for Vercel
-
-// const { connect } = require('./config/database-config');
-// const apiRoutes = require('./routes/index');
-
-// const app = express();
-
-// // ✅ CORS middleware
-// app.use(cors({
-//   origin: 'http://localhost:5173', // Or use "*" if you want to allow all for now
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-//   credentials: true,
-// }));
-
-// // ✅ Required for preflight OPTIONS
-// app.options('*', cors());
-
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
-// app.use('/api', apiRoutes); // update your frontend calls accordingly
-
-// app.get('/', (req, res) => {
-//   res.send('Backend is running!');
-// });
-
-// // ✅ Connect to DB
-// connect().then(() => console.log('MongoDB connected'));
-
-// // ✅ This is required for Vercel
-// module.exports = app;
-// app.get('/api/v1/ping', (req, res) => {
-//   res.send('pong');
-// });
-// module.exports.handler = serverless(app);
-
 const express = require('express');
-const serverless = require('serverless-http');
+const bodyParser = require('body-parser');
 const cors = require('cors');
 
+const { PORT } = require('./config/server-config');
+const apiRoutes = require('./routes/index');
+const { connect } = require('./config/database-config');
+const logger = require('./config/logger');
+
 const app = express();
-
 app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use('/api', apiRoutes);
 
-app.get('/api/v1/ping', (req, res) => {
-  res.send('pong from Vercel');
-});
+app.get('/home', (req, res) => {
+    res.send('<h1>Home</h1>');
+})
 
-module.exports = serverless(app);
+const setupAndStartServer = function() {
+    app.listen(PORT, async function() {
+        console.log(`Server started at PORT ${PORT}`);
+        await connect();
+        console.log('Mongo db connected');
+    });
+}
+
+setupAndStartServer();
