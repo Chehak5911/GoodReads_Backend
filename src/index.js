@@ -32,4 +32,7 @@ connect().then(() => console.log('MongoDB connected'));
 
 // ✅ This is required for Vercel
 module.exports = app;
+app.get('/api/v1/ping', (req, res) => {
+  res.send('pong');
+});
 module.exports.handler = serverless(app);
