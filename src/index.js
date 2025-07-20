@@ -1,47 +1,35 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const serverless = require('serverless-http'); // 🔸 Add this
+const serverless = require('serverless-http'); // required for Vercel
 
-const { PORT } = require('./config/server-config');
-const apiRoutes = require('./routes/index');
 const { connect } = require('./config/database-config');
-const logger = require('./config/logger');
+const apiRoutes = require('./routes/index');
 
 const app = express();
 
-// ✅ Allow frontend origin during dev
+// ✅ CORS middleware
 app.use(cors({
-    origin: 'http://localhost:5173', // or "*" for all origins
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
+  origin: 'http://localhost:5173', // Or use "*" if you want to allow all for now
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }));
 
-// Handle OPTIONS explicitly (important for serverless environments)
+// ✅ Required for preflight OPTIONS
 app.options('*', cors());
-
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/api', apiRoutes);
+app.use('/api', apiRoutes); // update your frontend calls accordingly
 
-app.get('/home', (req, res) => {
-    res.send('<h1>Home</h1>');
+app.get('/', (req, res) => {
+  res.send('Backend is running!');
 });
 
-// ❌ Remove this block:
-// const setupAndStartServer = function() {
-//     app.listen(PORT, async function() {
-//         console.log(`Server started at PORT ${PORT}`);
-//         await connect();
-//         console.log('Mongo db connected');
-//     });
-// }
-// setupAndStartServer();
-
-// ✅ Replace with this for Vercel:
+// ✅ Connect to DB
 connect().then(() => console.log('MongoDB connected'));
 
-module.exports = app; // OR:
-module.exports.handler = serverless(app); // ✅ Vercel entry point
+// ✅ This is required for Vercel
+module.exports = app;
+module.exports.handler = serverless(app);
